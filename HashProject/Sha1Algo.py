@@ -35,7 +35,34 @@ class Sha1Algo(object):
         w_n = 16
         words = [chunk[i:i+w_n] for i in range(0, len(chunk), w_n)]
         # Extend chunk into 80 words...create 4 words from every word.
+        for i in range(16,80):
+            # 1. XOR selected words
+            new_word = self._do_XOR_for_words(i, words)
+            # 2. Left rotate 1
+            removed_left_item = new_word[0]
+            new_word = new_word[1:].append(removed_left_item)
+            # Save word to the list.
+            words.append(new_word)
+        # show
         print words
+
+
+    def _do_XOR_for_words(self, i, words):
+        # first doing [i-3]XOR[i-8]
+        new_word = self._XOR_two_words(words[i-3], words[i-8])
+        # then XOR'ing that by [i-14]
+        new_word = self._XOR_two_words(new_word, words[i-14])
+        # and that again by [i-16]
+        new_word = self._XOR_two_words(new_word, words[i-16])
+        # result
+        return new_word
+
+    def _XOR_two_words(self, word1, word2):
+        new_word = []
+        for i in range(0, len(word1)-1):
+            new_word.append(int(word1[i]) ^ int(word2[i]))
+        return new_word
+
 
     def _pad_and_chunk_message(self, input_msg):
         final_message = self._pad_given_message(input_msg)

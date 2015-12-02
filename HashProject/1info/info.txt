@@ -7,3 +7,17 @@ sha1 overview: http://www.herongyang.com/Cryptography/SHA1-Message-Digest-Algori
 stackoverlow: http://stackoverflow.com/questions/2112685/how-do-one-way-hash-functions-work
 youtube lecture: https://www.youtube.com/watch?v=5q8q4PhN0cw
 
+PYTHON
+
+==Bitwise operators: https://wiki.python.org/moin/BitwiseOperators
+~ Not
+^ XOR
+| Or
+& And
+
+https://wiki.python.org/moin/BitManipulation
+http://programmers.stackexchange.com/questions/158247/binary-representation-in-python-and-keeping-leading-zeros
+
+BITS
+http://stackoverflow.com/questions/11669178/how-to-create-an-array-of-bits-in-python
+
