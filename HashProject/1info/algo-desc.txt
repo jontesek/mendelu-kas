@@ -1,0 +1,11 @@
+SHA-1
+
+1. Preparation
+1.1 Appending Padding Bits
+1.2 Appending Length
+1.3 Preparing Processing Functions
+1.4 Preparing Processing Constants
+1.5 Initializing Buffers
+2. Processing Message in 512-bit Blocks
+
+3. Output

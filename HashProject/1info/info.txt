@@ -1,0 +1,9 @@
+
+LINKS
+hash functions: https://en.wikipedia.org/wiki/Cryptographic_hash_function
+sha1 standard: https://www.ipa.go.jp/security/rfc/RFC3174EN.html
+!!!how hash algo work: http://www.metamorphosite.com/one-way-hash-encryption-sha1-data-software
+sha1 overview: http://www.herongyang.com/Cryptography/SHA1-Message-Digest-Algorithm-Overview.html
+stackoverlow: http://stackoverflow.com/questions/2112685/how-do-one-way-hash-functions-work
+youtube lecture: https://www.youtube.com/watch?v=5q8q4PhN0cw
+
