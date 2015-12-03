@@ -1,3 +1,4 @@
+import operator
 
 
 class Sha1Algo(object):
@@ -45,27 +46,63 @@ class Sha1Algo(object):
             new_word.append(removed_left_item)
             # Save word to the list.
             words.append(''.join([str(x) for x in new_word]))
-        # show
-        print words
+        # Prepare variables
+        letter_variables = {
+            'A': self.h_values['h0'],
+            'B': self.h_values['h1'],
+            'C': self.h_values['h2'],
+            'D': self.h_values['h3'],
+            'E': self.h_values['h4']
+        }
+        # Process all words
+        new_words = []
+        for i, word in enumerate(words):
+            if 0 <= i <= 19:
+                (F, K) = self._process_letters_1(letter_variables)
+            elif 20 <= i <= 39:
+                (F, K) = self._process_letters_2(letter_variables)
+            elif 40 <= i <= 59:
+                (F, K) = self._process_word_3(letter_variables)
+            else:
+                (F, K) = self._process_word_4(letter_variables)
+            new_words.append(word)
         exit()
+
 
 
     def _do_XOR_for_words(self, i, words):
         # first doing [i-3]XOR[i-8]
-        new_word = self._XOR_two_words(words[i-3], words[i-8])
+        new_word = self._apply_binary_operator('XOR', words[i-3], words[i-8])
         # then XOR'ing that by [i-14]
-        new_word = self._XOR_two_words(new_word, words[i-14])
+        new_word = self._apply_binary_operator('XOR', new_word, words[i-14])
         # and that again by [i-16]
-        new_word = self._XOR_two_words(new_word, words[i-16])
+        new_word = self._apply_binary_operator('XOR', new_word, words[i-16])
         # result
         return new_word
 
-    def _XOR_two_words(self, word1, word2):
+    def _apply_binary_operator(self, str_op, word1, word2):
         new_word = []
+        # Choose the right operator.
+        if str_op == 'XOR':
+            apply_op = operator.xor
+        elif str_op == 'AND':
+            apply_op = operator.and_
+        elif str_op == 'OR':
+            apply_op = operator.or_
+        # Apply operator on the two words.
         for i in range(0, len(word1)):
-            new_word.append(int(word1[i]) ^ int(word2[i]))
+            new_word.append(apply_op(int(word1[i]), int(word2[i])))
+        # result
         return new_word
 
+    def _negate_word(self, word):
+        new_word = []
+        # Apply operator on the word.
+        for i in range(0, len(word)):
+            new_str = 1 if int(word[i]) == 0 else 0
+            new_word.append(new_str)
+        # result
+        return new_word
 
     def _pad_and_chunk_message(self, input_msg):
         final_message = self._pad_given_message(input_msg)
@@ -97,6 +134,40 @@ class Sha1Algo(object):
         n = 512
         return [msg[i:i+n] for i in range(0, len(msg), n)]
 
+    def _process_letters_1(self, letters):
+        """
+        1. set the variable 'f' equal to: (B AND C) or (!B AND D)
+        2. set the variable 'k' equal to: 01011010100000100111100110011001
+        """
+        # 1. B and C
+        b_and_c = self._apply_binary_operator('AND', letters['B'], letters['C'])
+        # 2. (!B and D)
+        not_b_and_d = self._apply_binary_operator('AND', self._negate_word(letters['B']), letters['D'])
+        # 1 or 2
+        F = self._apply_binary_operator('OR', b_and_c, not_b_and_d)
+        K = '01011010100000100111100110011001'
+        # result
+        print(''.join([str(x) for x in F]))
+        return (F, K)
+
+    def _process_letters_2(self, letters):
+        """
+        1. set the variable 'f' equal to: B XOR C XOR D
+        2. set the variable 'k' equal to: 01101110110110011110101110100001
+        """
+        # 1. B xor C
+        b_xor_c = self._apply_binary_operator('XOR', letters['B'], letters['C'])
+        #print(self._list_to_string(letters['B']))
+        #print(self._list_to_string(letters['C']))
+        #print(''.join([str(x) for x in b_xor_c]))
+        #exit()
+        # 1 xor D
+        F = self._apply_binary_operator('AND', b_xor_c, letters['D'])
+        K = '01011010100000100111100110011001'
+        # result
+        exit(''.join([str(x) for x in F]))
+        return (F, K)
 
 
-
+    def _list_to_string(self, my_list):
+        return ''.join([str(x) for x in my_list])
