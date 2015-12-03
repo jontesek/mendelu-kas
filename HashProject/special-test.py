@@ -1,6 +1,10 @@
 
 word1 = '0100000100100000'
 word2 = '0101010001100101'
+new_word = list('1001010')
+print new_word
 
-for i in range(0, len(word1)-1):
-    print int(word1[i]) ^ int(word2[i])
+removed_left_item = new_word[0]
+new_word = new_word[1:]
+new_word.append(removed_left_item)
+print new_word

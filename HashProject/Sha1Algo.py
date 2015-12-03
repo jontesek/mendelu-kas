@@ -32,19 +32,22 @@ class Sha1Algo(object):
 
     def _process_chunk(self, chunk):
         # Split chunk into 16 32-bit words (16x32 = 512)
-        w_n = 16
-        words = [chunk[i:i+w_n] for i in range(0, len(chunk), w_n)]
+        w_size = 32
+        words = [chunk[i:i+w_size] for i in range(0, len(chunk), w_size)]
         # Extend chunk into 80 words...create 4 words from every word.
-        for i in range(16,80):
+        for i in range(16, 80):
+            #print '===%d===' % i
             # 1. XOR selected words
             new_word = self._do_XOR_for_words(i, words)
             # 2. Left rotate 1
             removed_left_item = new_word[0]
-            new_word = new_word[1:].append(removed_left_item)
+            new_word = new_word[1:]
+            new_word.append(removed_left_item)
             # Save word to the list.
-            words.append(new_word)
+            words.append(''.join([str(x) for x in new_word]))
         # show
         print words
+        exit()
 
 
     def _do_XOR_for_words(self, i, words):
@@ -59,7 +62,7 @@ class Sha1Algo(object):
 
     def _XOR_two_words(self, word1, word2):
         new_word = []
-        for i in range(0, len(word1)-1):
+        for i in range(0, len(word1)):
             new_word.append(int(word1[i]) ^ int(word2[i]))
         return new_word
 

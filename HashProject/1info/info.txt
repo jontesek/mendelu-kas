@@ -14,10 +14,10 @@ PYTHON
 ^ XOR
 | Or
 & And
-
+BIT operations
 https://wiki.python.org/moin/BitManipulation
 http://programmers.stackexchange.com/questions/158247/binary-representation-in-python-and-keeping-leading-zeros
-
-BITS
+http://www.falatic.com/index.php/108/python-and-bitwise-rotation
+BITS representation
 http://stackoverflow.com/questions/11669178/how-to-create-an-array-of-bits-in-python
 
