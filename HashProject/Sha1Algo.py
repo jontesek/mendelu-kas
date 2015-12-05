@@ -3,22 +3,14 @@ import operator
 
 class Sha1Algo(object):
 
-    INIT_BUFFERS = {
-        'h0': '01100111010001010010001100000001',  # 0x67452301
-        'h1': '11101111110011011010101110001001',  # 0xEFCDAB89
-        'h2': '10011000101110101101110011111110',  # 0x98BADCFE
-        'h3': '00010000001100100101010001110110',  # 0x10325476
-        'h4': '11000011110100101110000111110000',  # 0xC3D2E1F0
-    }
-
     def __init__(self):
-        self.h_values = {
-            'h0': '01100111010001010010001100000001',  # 0x67452301
-            'h1': '11101111110011011010101110001001',  # 0xEFCDAB89
-            'h2': '10011000101110101101110011111110',  # 0x98BADCFE
-            'h3': '00010000001100100101010001110110',  # 0x10325476
-            'h4': '11000011110100101110000111110000',  # 0xC3D2E1F0
-        }
+        self.h_values = [
+            '01100111010001010010001100000001',  # 0x67452301
+            '11101111110011011010101110001001',  # 0xEFCDAB89
+            '10011000101110101101110011111110',  # 0x98BADCFE
+            '00010000001100100101010001110110',  # 0x10325476
+            '11000011110100101110000111110000',  # 0xC3D2E1F0
+        ]
 
     def hash_text(self, input_text):
         # Convert text to binary string
@@ -27,11 +19,19 @@ class Sha1Algo(object):
         bin_together = ''.join(binary_numbers)
         # Prepare and chunk message
         chunks = self._pad_and_chunk_message(bin_together)
+        h_values = self.h_values
         # Process all chunks
-        for chunk in chunks:
-            h_values = self._process_chunk(chunk)
+        for i, chunk in enumerate(chunks):
+            print('======CHUNK %d======') % i
+            h_values = self._process_chunk(chunk, h_values)
+        # Convert last h values to hexadecimal numbers.
+        hex_values = [hex(x)[2:-1] for x in h_values]
+        # Join the numbers together
+        final_hash = ''.join(hex_values)
+        # result
+        print final_hash
 
-    def _process_chunk(self, chunk):
+    def _process_chunk(self, chunk, h_values):
         # Split chunk into 16 32-bit words (16x32 = 512)
         w_size = 32
         words = [chunk[i:i+w_size] for i in range(0, len(chunk), w_size)]
@@ -41,32 +41,46 @@ class Sha1Algo(object):
             # 1. XOR selected words
             new_word = self._do_XOR_for_words(i, words)
             # 2. Left rotate 1
-            removed_left_item = new_word[0]
-            new_word = new_word[1:]
-            new_word.append(removed_left_item)
+            new_word = self._left_rotate_word(new_word, 1)
             # Save word to the list.
-            words.append(''.join([str(x) for x in new_word]))
-        # Prepare variables
-        letter_variables = {
-            'A': self.h_values['h0'],
-            'B': self.h_values['h1'],
-            'C': self.h_values['h2'],
-            'D': self.h_values['h3'],
-            'E': self.h_values['h4']
+            words.append(new_word)
+        # Initialize variables
+        letters = {
+            'A': h_values[0],
+            'B': h_values[1],
+            'C': h_values[2],
+            'D': h_values[3],
+            'E': h_values[4]
         }
         # Process all words
         new_words = []
         for i, word in enumerate(words):
+            print '===word %d===' % i
+            print letters
             if 0 <= i <= 19:
-                (F, K) = self._process_letters_1(letter_variables)
+                (F, K) = self._process_letters_1(letters)
+                letters = self._update_letters(word, letters, F, K)
             elif 20 <= i <= 39:
-                (F, K) = self._process_letters_2(letter_variables)
+                (F, K) = self._process_letters_2(letters)
+                letters = self._update_letters(word, letters, F, K)
             elif 40 <= i <= 59:
-                (F, K) = self._process_word_3(letter_variables)
+                (F, K) = self._process_letters_3(letters)
+                letters = self._update_letters(word, letters, F, K)
             else:
-                (F, K) = self._process_word_4(letter_variables)
+                (F, K) = self._process_letters_2(letters)
+                K = '11001010011000101100000111010110'
+                letters = self._update_letters(word, letters, F, K)
             new_words.append(word)
-        exit()
+        # calculate new h values (truncate longer than 32 bits)
+        updated_h_values = [
+            self._sum_bit_numbers([int(h_values[0], 2), int(letters['A'], 2)]) & 0xFFFFFFFF,
+            self._sum_bit_numbers([int(h_values[1], 2), int(letters['B'], 2)]) & 0xFFFFFFFF,
+            self._sum_bit_numbers([int(h_values[2], 2), int(letters['C'], 2)]) & 0xFFFFFFFF,
+            self._sum_bit_numbers([int(h_values[3], 2), int(letters['D'], 2)]) & 0xFFFFFFFF,
+            self._sum_bit_numbers([int(h_values[4], 2), int(letters['E'], 2)]) & 0xFFFFFFFF
+        ]
+        return updated_h_values
+
 
 
 
@@ -89,11 +103,11 @@ class Sha1Algo(object):
             apply_op = operator.and_
         elif str_op == 'OR':
             apply_op = operator.or_
-        # Apply operator on the two words.
+        # Apply operator on every character of the two words.
         for i in range(0, len(word1)):
             new_word.append(apply_op(int(word1[i]), int(word2[i])))
         # result
-        return new_word
+        return self._list_to_string(new_word)
 
     def _negate_word(self, word):
         new_word = []
@@ -102,7 +116,7 @@ class Sha1Algo(object):
             new_str = 1 if int(word[i]) == 0 else 0
             new_word.append(new_str)
         # result
-        return new_word
+        return self._list_to_string(new_word)
 
     def _pad_and_chunk_message(self, input_msg):
         final_message = self._pad_given_message(input_msg)
@@ -147,7 +161,6 @@ class Sha1Algo(object):
         F = self._apply_binary_operator('OR', b_and_c, not_b_and_d)
         K = '01011010100000100111100110011001'
         # result
-        print(''.join([str(x) for x in F]))
         return (F, K)
 
     def _process_letters_2(self, letters):
@@ -157,17 +170,65 @@ class Sha1Algo(object):
         """
         # 1. B xor C
         b_xor_c = self._apply_binary_operator('XOR', letters['B'], letters['C'])
-        #print(self._list_to_string(letters['B']))
-        #print(self._list_to_string(letters['C']))
-        #print(''.join([str(x) for x in b_xor_c]))
-        #exit()
         # 1 xor D
-        F = self._apply_binary_operator('AND', b_xor_c, letters['D'])
-        K = '01011010100000100111100110011001'
+        F = self._apply_binary_operator('XOR', b_xor_c, letters['D'])
+        K = '01101110110110011110101110100001'
         # result
-        exit(''.join([str(x) for x in F]))
+        return (F, K)
+
+    def _process_letters_3(self, letters):
+        """
+        1. set the variable 'f' equal to: (B AND C) OR (B AND D) OR (C AND D)
+        2. set the variable 'k' equal to: 10001111000110111011110011011100
+        """
+        # 1. B and C
+        b_and_c = self._apply_binary_operator('AND', letters['B'], letters['C'])
+        # 2. 1 or (B and D)
+        b_and_d = self._apply_binary_operator('AND', letters['B'], letters['D'])
+        exp_2 = self._apply_binary_operator('OR', b_and_c, b_and_d)
+        # 3. 2 or (C and D)
+        c_and_d = self._apply_binary_operator('AND', letters['C'], letters['D'])
+        F = self._apply_binary_operator('OR', exp_2, c_and_d)
+        K = '10001111000110111011110011011100'
+        # result
         return (F, K)
 
 
     def _list_to_string(self, my_list):
         return ''.join([str(x) for x in my_list])
+
+    def _update_letters(self, word, letters, F, K):
+        # temp = (A left rotate 5) + F + E + K + (the current word)
+        a_left_5 = self._left_rotate_word(letters['A'], 5)
+        temp = self._sum_bit_numbers([int(a_left_5, 2), int(F, 2), int(letters['E'], 2), int(K, 2), int(word, 2)])
+        # truncate temp
+        temp &= 0xFFFFFFFF
+        # add leading zeroes
+        temp_str = bin(temp)[2:].zfill(32)
+        # update letters
+        new_letters = {
+            'E': letters['D'],
+            'D': letters['C'],
+            'C': self._left_rotate_word(letters['B'], 30),
+            'B': letters['A'],
+            'A': temp_str
+        }
+        return new_letters
+
+    def _left_rotate_word(self, word, n):
+        removed_left_items = word[0:n]
+        word = word[n:]
+        word += removed_left_items
+        return word
+
+    def _sum_bit_numbers(self, bin_list):
+        total_sum = 0
+        for i in range(0, len(bin_list)-1):
+            #print bin(bin_list[i])
+            if i == 0:
+                total_sum = bin_list[i] + bin_list[i+1]
+            else:
+                total_sum += bin_list[i+1]
+            #print(bin(total_sum))
+        # result
+        return total_sum

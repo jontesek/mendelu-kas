@@ -16,8 +16,16 @@ PYTHON
 & And
 BIT operations
 https://wiki.python.org/moin/BitManipulation
+https://wiki.python.org/moin/BitwiseOperators
+https://wiki.python.org/moin/BitArrays
+http://rosettacode.org/wiki/Bitwise_operations#Python
+
 http://programmers.stackexchange.com/questions/158247/binary-representation-in-python-and-keeping-leading-zeros
 http://www.falatic.com/index.php/108/python-and-bitwise-rotation
+
+http://stackoverflow.com/questions/2576712/using-python-how-can-i-read-the-bits-in-a-byte
+
 BITS representation
 http://stackoverflow.com/questions/11669178/how-to-create-an-array-of-bits-in-python
+http://stackoverflow.com/questions/12461361/bits-list-to-integer-in-python?lq=1
 
