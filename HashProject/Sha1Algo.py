@@ -23,9 +23,12 @@ class Sha1Algo(object):
         # Process all chunks
         for i, chunk in enumerate(chunks):
             print('======CHUNK %d======') % i
-            h_values = self._process_chunk(chunk, h_values)
+            if i == 0:
+                h_values = self._process_chunk(chunk, h_values)
+            else:
+                h_values = self._process_chunk(chunk, self._bin_to_string_list(h_values))
         # Convert last h values to hexadecimal numbers.
-        hex_values = [hex(x)[2:-1] for x in h_values]
+        hex_values = [hex(x)[2:-1].zfill(8) for x in h_values]
         # Join the numbers together
         final_hash = ''.join(hex_values)
         # result
@@ -39,7 +42,7 @@ class Sha1Algo(object):
         for i in range(16, 80):
             #print '===%d===' % i
             # 1. XOR selected words
-            new_word = self._do_XOR_for_words(i, words)
+            new_word = self._do_xor_for_words(i, words)
             # 2. Left rotate 1
             new_word = self._left_rotate_word(new_word, 1)
             # Save word to the list.
@@ -52,11 +55,14 @@ class Sha1Algo(object):
             'D': h_values[3],
             'E': h_values[4]
         }
+        print letters
         # Process all words
         new_words = []
         for i, word in enumerate(words):
             print '===word %d===' % i
             print letters
+            if len(word) != 32:
+                exit(word)
             if 0 <= i <= 19:
                 (F, K) = self._process_letters_1(letters)
                 letters = self._update_letters(word, letters, F, K)
@@ -81,10 +87,7 @@ class Sha1Algo(object):
         ]
         return updated_h_values
 
-
-
-
-    def _do_XOR_for_words(self, i, words):
+    def _do_xor_for_words(self, i, words):
         # first doing [i-3]XOR[i-8]
         new_word = self._apply_binary_operator('XOR', words[i-3], words[i-8])
         # then XOR'ing that by [i-14]
@@ -193,10 +196,6 @@ class Sha1Algo(object):
         # result
         return (F, K)
 
-
-    def _list_to_string(self, my_list):
-        return ''.join([str(x) for x in my_list])
-
     def _update_letters(self, word, letters, F, K):
         # temp = (A left rotate 5) + F + E + K + (the current word)
         a_left_5 = self._left_rotate_word(letters['A'], 5)
@@ -232,3 +231,10 @@ class Sha1Algo(object):
             #print(bin(total_sum))
         # result
         return total_sum
+
+    def _bin_to_string_list(self, bin_list):
+        new_vals = [bin(x)[2:].zfill(32) for x in bin_list]
+        return new_vals
+
+    def _list_to_string(self, my_list):
+        return ''.join([str(x) for x in my_list])

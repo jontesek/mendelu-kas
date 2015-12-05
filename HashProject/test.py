@@ -2,10 +2,10 @@ from Sha1Algo import Sha1Algo
 
 sa = Sha1Algo()
 # Short text: 8f0c0855915633e4a7de19468b3874c8901df043
-sa.hash_text('A Test')
+#sa.hash_text('A Test')
 
-# Long text: 100 bytes: 1dec7089cf0f943196efc9c9499a2ab41458e12e
-#sa.hash_text('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ac libero gravida, lacinia metus')    # 100 bytes
+# Long text: 100 bytes: c6d7501f54c1099833b6b19558b48dc2fc84c14c
+sa.hash_text('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel massa sem. Nullam commodo nullam')
 
 # A file: 5 kB:
 
