@@ -29,3 +29,8 @@ BITS representation
 http://stackoverflow.com/questions/11669178/how-to-create-an-array-of-bits-in-python
 http://stackoverflow.com/questions/12461361/bits-list-to-integer-in-python?lq=1
 
+https://books.google.cz/books?id=GxKWdn7u4w8C
+http://stackoverflow.com/questions/9490730/what-is-the-most-efficient-way-to-concatenate-and-store-long-bit-strings
+
+ONLINE tools
+http://www.fileformat.info/tool/hash.htm

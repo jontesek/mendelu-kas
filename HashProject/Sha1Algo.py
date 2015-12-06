@@ -1,5 +1,5 @@
 import operator
-
+import os.path
 
 class Sha1Algo(object):
 
@@ -17,9 +17,26 @@ class Sha1Algo(object):
         ascii_codes = self._convert_text_to_ascii_codes(input_text)
         binary_numbers = self._convert_ascii_to_binary(ascii_codes)
         bin_together = ''.join(binary_numbers)
+        # hash string
+        print('<<<HASH VALUE>>>')
+        print self._hash_bit_string(bin_together)
+
+    def hash_file(self, file_path):
+        # Read file
+        file_obj = open(os.path.abspath(file_path), 'rb')
+        bin_string = ''
+        file_bytes = (ord(b) for b in file_obj.read())
+        for byte in file_bytes:
+            bin_string += bin(byte)[2:].zfill(8)
+        # hash string
+        print('<<<HASH VALUE>>>')
+        print self._hash_bit_string(bin_string)
+
+    def _hash_bit_string(self, bin_string):
         # Prepare and chunk message
-        chunks = self._pad_and_chunk_message(bin_together)
+        chunks = self._pad_and_chunk_message(bin_string)
         h_values = self.h_values
+        #print('Number of chunks: %d') % len(chunks)
         # Process all chunks
         for i, chunk in enumerate(chunks):
             print('======CHUNK %d======') % i
@@ -32,7 +49,7 @@ class Sha1Algo(object):
         # Join the numbers together
         final_hash = ''.join(hex_values)
         # result
-        print final_hash
+        return final_hash
 
     def _process_chunk(self, chunk, h_values):
         # Split chunk into 16 32-bit words (16x32 = 512)
@@ -55,12 +72,11 @@ class Sha1Algo(object):
             'D': h_values[3],
             'E': h_values[4]
         }
-        print letters
         # Process all words
         new_words = []
         for i, word in enumerate(words):
-            print '===word %d===' % i
-            print letters
+            #print '===word %d===' % i
+            #print letters
             if len(word) != 32:
                 exit(word)
             if 0 <= i <= 19:
@@ -238,3 +254,11 @@ class Sha1Algo(object):
 
     def _list_to_string(self, my_list):
         return ''.join([str(x) for x in my_list])
+
+    # http://stackoverflow.com/questions/2576712/using-python-how-can-i-read-the-bits-in-a-byte
+    def _read_bits_from_file(self, f):
+        bytes = (ord(b) for b in f.read())
+        for b in bytes:
+            for i in xrange(8):
+                yield (b >> i) & 1
+
