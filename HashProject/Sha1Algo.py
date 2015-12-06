@@ -1,6 +1,7 @@
 import operator
 import os.path
 
+
 class Sha1Algo(object):
 
     def __init__(self):
@@ -14,12 +15,11 @@ class Sha1Algo(object):
 
     def hash_text(self, input_text):
         # Convert text to binary string
-        ascii_codes = self._convert_text_to_ascii_codes(input_text)
-        binary_numbers = self._convert_ascii_to_binary(ascii_codes)
-        bin_together = ''.join(binary_numbers)
-        # hash string
-        print('<<<HASH VALUE>>>')
-        print self._hash_bit_string(bin_together)
+        utf8_codes = self._convert_text_to_utf8_codes(input_text)
+        binary_numbers = self._convert_utf8_to_binary(utf8_codes)
+        bin_string = ''.join(binary_numbers)
+        # hash the string
+        self._hash_bin_string(bin_string)
 
     def hash_file(self, file_path):
         # Read file
@@ -28,15 +28,15 @@ class Sha1Algo(object):
         file_bytes = (ord(b) for b in file_obj.read())
         for byte in file_bytes:
             bin_string += bin(byte)[2:].zfill(8)
-        # hash string
-        print('<<<HASH VALUE>>>')
-        print self._hash_bit_string(bin_string)
+        # hash the string
+        self._hash_bin_string(bin_string)
 
-    def _hash_bit_string(self, bin_string):
+    def _hash_bin_string(self, bin_string):
         # Prepare and chunk message
         chunks = self._pad_and_chunk_message(bin_string)
         h_values = self.h_values
-        #print('Number of chunks: %d') % len(chunks)
+        print('<<<START HASHING>>>')
+        print('Number of chunks: %d') % len(chunks)
         # Process all chunks
         for i, chunk in enumerate(chunks):
             print('======CHUNK %d======') % i
@@ -49,6 +49,7 @@ class Sha1Algo(object):
         # Join the numbers together
         final_hash = ''.join(hex_values)
         # result
+        print('>>>DIGEST<<<\n' + final_hash)
         return final_hash
 
     def _process_chunk(self, chunk, h_values):
@@ -141,10 +142,11 @@ class Sha1Algo(object):
         final_message = self._pad_given_message(input_msg)
         return self._split_msg_into_chunks(final_message)
 
-    def _convert_text_to_ascii_codes(self, input_text):
-        return [ord(c) for c in input_text]
+    def _convert_text_to_utf8_codes(self, input_text):
+        utf8_input = unicode(input_text, 'utf-8').encode('utf-8')
+        return [ord(c) for c in utf8_input]
 
-    def _convert_ascii_to_binary(self, ascii_codes):
+    def _convert_utf8_to_binary(self, ascii_codes):
         return [bin(x)[2:].zfill(8) for x in ascii_codes]
 
     def _pad_given_message(self, original_msg):
@@ -254,11 +256,3 @@ class Sha1Algo(object):
 
     def _list_to_string(self, my_list):
         return ''.join([str(x) for x in my_list])
-
-    # http://stackoverflow.com/questions/2576712/using-python-how-can-i-read-the-bits-in-a-byte
-    def _read_bits_from_file(self, f):
-        bytes = (ord(b) for b in f.read())
-        for b in bytes:
-            for i in xrange(8):
-                yield (b >> i) & 1
-
