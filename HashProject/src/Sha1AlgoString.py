@@ -2,7 +2,7 @@ import operator
 import os.path
 
 
-class Sha1Algo(object):
+class Sha1AlgoString(object):
 
     def __init__(self):
         self.h_values = [

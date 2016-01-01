@@ -9,3 +9,5 @@ m = hashlib.sha1()
 m.update(my_str.encode('utf-8'))
 print m.hexdigest()
 
+
+
