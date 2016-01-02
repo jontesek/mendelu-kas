@@ -1,5 +1,4 @@
 import struct
-import os.path
 
 
 class Sha1Algo(object):
@@ -13,26 +12,33 @@ class Sha1Algo(object):
             0x10325476,
             0xC3D2E1F0,
         )
+        # Verbose flag
+        self.verbose = False
 
-    def hash_text(self, input_text):
+    def hash_text(self, input_text, text_encoding='utf-8', verbose=False):
         """Public method for hashing given text."""
+        # Set verbose flag
+        self.verbose = verbose
         # Convert text to bytes (utf8).
-        utf8_codes = self._convert_text_to_utf8_codes(input_text)
+        utf8_codes = self._convert_text_to_utf8_codes(input_text, text_encoding)
         text_bytes = bytearray(utf8_codes)
         # Hash the bytes.
         return self._hash_bytes(text_bytes)
 
-    def hash_file(self, file_path):
+    def hash_file(self, file_path, verbose=False):
         """Public method for hashing given file."""
+        # Set verbose flag
+        self.verbose = verbose
+        # Read file to array of bytes.
         try:
-            # Read file to array of bytes.
-            file_obj = open(os.path.abspath(file_path), 'rb')
+            file_obj = open(file_path, 'rb')
             file_bytes = bytearray(file_obj.read())
             file_obj.close()
             # Hash the bytes.
             return self._hash_bytes(file_bytes)
         except IOError:
             print('The file ' + file_path + ' was not found.')
+            return False
 
     def _hash_bytes(self, byte_array):
         """Main private method for hashing (both strings and files)."""
@@ -42,12 +48,12 @@ class Sha1Algo(object):
         h_values = self.h_values
         # Process all chunks
         for i, chunk in enumerate(chunks):
-            #print('======CHUNK %d======') % i
+            if self.verbose:
+                print('======CHUNK %d======') % i
             h_values = self._process_chunk(chunk, h_values)
         # Produce digest from final h values.
         final_hash = self._produce_hex_digest(h_values)
         # result
-        print('>>>DIGEST<<<\n' + final_hash)
         return final_hash
 
     def _prepare_msg(self, msg):
@@ -131,9 +137,9 @@ class Sha1Algo(object):
         hex_values = [hex(x)[2:-1].zfill(8) for x in h_values]
         return ''.join(hex_values)
 
-    def _convert_text_to_utf8_codes(self, input_text):
+    def _convert_text_to_utf8_codes(self, input_text, text_encoding):
         """Convert given text to a list of utf8 codes of its characters."""
-        utf8_input = unicode(input_text, 'utf-8').encode('utf-8')
+        utf8_input = unicode(input_text, text_encoding).encode('utf-8')
         return [ord(c) for c in utf8_input]
 
     def _bytes_to_bin_string(self, byte_array):
