@@ -4,6 +4,7 @@ import struct
 class Sha1Algo(object):
 
     def __init__(self):
+        """Constructor"""
         # Initial H variables
         self.h_values = (
             0x67452301,
@@ -138,7 +139,7 @@ class Sha1Algo(object):
         return ''.join(hex_values)
 
     def _convert_text_to_utf8_codes(self, input_text, text_encoding):
-        """Convert given text to a list of utf8 codes of its characters."""
+        """Convert given text (in given encoding) to a list of utf8 codes of its characters."""
         utf8_input = unicode(input_text, text_encoding).encode('utf-8')
         return [ord(c) for c in utf8_input]
 
