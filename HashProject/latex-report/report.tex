@@ -29,7 +29,7 @@ Aplikace je vytvořená v interpretovaném jazyku Python (verze 2.7) a použív�
 Po rozbalení archívu lze aplikaci spustit pomocí souboru \texttt{sha1.py}, který se nachází v kořenovém adresáři. Popis parametrů:
 
 \begin{verbatim}
-python sha1.py [-h] [-s <string>] [-f <filename>] [-v]
+python sha1.py [-h] [-s <string>] [-f <filename>] [-v] [input]
 \end{verbatim}
 
 \begin{itemize}
@@ -38,9 +38,10 @@ python sha1.py [-h] [-s <string>] [-f <filename>] [-v]
 \item \texttt{sha1.py -s \dqtt{test} -v} ... vypíše určité informace během hashování.
 \item \texttt{sha1.py -f  \dqtt{file.txt}} ... najde hash pro soubor ``file.txt''.
 \item \texttt{sha1.py -f  \dqtt{file.txt} -v} ... vypíše určité informace během hashování.
+\item \texttt{sha1.py \dqtt{test}} ... najde hash pro řetězec ``test''.
 \end{itemize}
 
-Je nutné zadat jeden z parametrů \verb|-s| nebo \verb|-f|. Pokud není zadán ani jeden z nich, program vypíše chybu. Pokud jsou zadány oba dva, použije se pouze  \verb|-s|. 
+Pokud není zadán přepínač \verb|-s| nebo \verb|-f|, musí být jako vstupní parametr alespoň řetězec. Pokud není přítomen žádný parametr, program vypíše chybu.
 
 Soubor \verb|sha1_test.py| obsahuje automatické testy, které spuštěním souboru proběhnou a poté se zobrazí výsledek.
 
@@ -50,12 +51,11 @@ Poznámka 2: České znaky se ve výstupu do konzole nezobrazí správně, jelik
 
 \section{Implementace aplikace}
 Aplikace má následující strukturu:
-\begin{verbatim}
-\src\Sha1Algo.py ... hlavní třída
-\tests ... soubory pro testování
-\sha1.py ... výkonný skript - zajišťuje práci s příkazovou řádkou
-\sha1_test.py ... testovací skript - spouští testy
-\end{verbatim}
+\\ \\
+\verb|\src\Sha1Algo.py| ... hlavní třída \\
+\verb|\tests| ... soubory pro testování \\
+\verb|\sha1.py| ... výkonný skript -- zajišťuje práci s příkazovou řádkou \\
+\verb|\sha1_test.py| ... testovací skript -- spouští testy \\
 
 Jak funguje algoritmus SHA1 popisuje standard z USA nazvaný ``FIPS PUB 180-1'', který je dostupný např. zde: \url{http://www.nymphomath.ch/crypto/moderne/fip180-1.html}. V aplikaci je použita standardní verze výpočtu hashe ze sekce 7. 
 
@@ -82,6 +82,7 @@ Zdrojový kód aplikace je poměrně dost okomentovaný, takže dále to již as
 
 Pro otestování třídy \texttt{Sha1Algo} byla vytvořena testovací třída \texttt{TestSha1Algo}, která využívá modul \texttt{unittest}. Obsahuje dva testy pro řetězce (jeden v AJ a~jeden v ČJ) a dva testy pro soubory (o velikosti 302 bytů a 57 kB). 
 Výsledek aplikace se porovnává s výsledkem modulu \verb|hashlib|. 
+
 
 
 

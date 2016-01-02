@@ -31,21 +31,26 @@ if __name__ == '__main__':
     parser.add_argument('-s', action='store', help='string to hash', metavar='<string>')
     parser.add_argument('-f', action='store', help='file to hash', metavar='<filename>')
     parser.add_argument('-v', action='store_true', help='verbose output - show some steps')
+    parser.add_argument('input', nargs="?", help='string to hash')
     args = parser.parse_args()
 
     # Check arguments and call the correct hashing method.
-    if args.s:
+    if args.input:
+        final_digest = sa.hash_text(args.input, terminal_encoding, args.v)
+        source = args.input
+    elif args.s:
         final_digest = sa.hash_text(args.s, terminal_encoding, args.v)
+        source = args.s
     elif args.f:
         file_path = os.path.abspath(args.f)
         final_digest = sa.hash_file(file_path, args.v)
         if not final_digest:
             raise SystemExit('The file ' + file_path + ' was not found.')
+        source = args.f
     else:
         raise SystemExit('Enter an argument to hash (-s for string and -f for file).\n'
                          'Use -h option to show all possible arguments.')
 
     # Show source and the final digest
-    source = args.s if args.s else args.f
     print('string|filename: ' + source)
     print('SHA1 digest: ' + final_digest)
