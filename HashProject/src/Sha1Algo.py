@@ -23,6 +23,11 @@ class Sha1Algo(object):
         # Convert text to bytes (utf8).
         utf8_codes = self._convert_text_to_utf8_codes(input_text, text_encoding)
         text_bytes = bytearray(utf8_codes)
+        if self.verbose:
+            print('===Input text===')
+            print('-> ' + str(len(utf8_codes)) + ' chars; codes: ' + ','.join([str(x) for x in utf8_codes]))
+            bin_string = self._bytes_to_bin_string(utf8_codes)
+            print('-> ' + str(len(bin_string)) + ' bits: ' + bin_string)
         # Hash the bytes.
         return self._hash_bytes(text_bytes)
 
@@ -35,22 +40,29 @@ class Sha1Algo(object):
             file_obj = open(file_path, 'rb')
             file_bytes = bytearray(file_obj.read())
             file_obj.close()
+            if self.verbose:
+                print('===Input file===')
+                print 'File size (in bytes): ' + str(len(file_bytes))
             # Hash the bytes.
             return self._hash_bytes(file_bytes)
         except IOError:
-            print('The file ' + file_path + ' was not found.')
             return False
 
     def _hash_bytes(self, byte_array):
         """Main private method for hashing (both strings and files)."""
         # Prepare and chunk message.
         prepared_msg = self._prepare_msg(byte_array)
+        if self.verbose:
+            print('===Prepared message===')
+            bin_string = self._bytes_to_bin_string(prepared_msg)
+            print(str(len(bin_string)) + ' bits: ' + bin_string)
         chunks = self._chunk_msg(prepared_msg)
         h_values = self.h_values
         # Process all chunks
         for i, chunk in enumerate(chunks):
             if self.verbose:
                 print('======CHUNK %d======') % i
+                print('h values:'), h_values
             h_values = self._process_chunk(chunk, h_values)
         # Produce digest from final h values.
         final_hash = self._produce_hex_digest(h_values)

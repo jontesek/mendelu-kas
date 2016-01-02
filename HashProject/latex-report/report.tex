@@ -1,0 +1,88 @@
+\documentclass[a4paper]{article}
+\usepackage[english]{babel}
+\usepackage{xltxtra}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{graphicx}
+%\usepackage[a4paper]{geometry}
+\begin{document}
+\title{\vspace{-2.0cm}Komprimace dat a kryptologie \\ \textbf{Hashovací funkce SHA1}}
+\author{Jonáš Petrovský\\
+        Faculty of Business and Economics,\\
+		Mendel University in Brno,\\
+		Czech Republic \\
+		\texttt{jond@post.cz}}
+\date{\today}
+\maketitle
+
+% příkaz pro uvozovky
+\newcommand{\dqtt}[1]{\texttt{\char`\"}#1\texttt{\char`\"}}
+
+\section{Úvod}
+Cílem práce je vytvořit aplikaci, která bude implementovat vybranou hashovací funkci. Funkce musí být netriviální, musí být použit vhodný programovací jazyk, aplikace musí být user-friendly.
+
+Bylo zvoleno, že bude implementována funkce SHA1 (Secure Hash Algorithm 1), která vznikla roku 1995. Je faktem, že již není považována za absolutně bezpečnou, jelikož byla popsána možnost jak generovat kolize s časovou náročností $2^{60}$. Přesto zatím nebyly žádné kolize objeveny. Každopádně pro ukázku základních principů hashování lze dobře použít.
+
+\section{Použití aplikace}
+Aplikace je vytvořená v interpretovaném jazyku Python (verze 2.7) a používá pouze součásti základní instalace (není nutné instalovat externí moduly). Jedná se o aplikaci bez GUI, je spouštěná přes příkazový řádek. 
+
+Po rozbalení archívu lze aplikaci spustit pomocí souboru \texttt{sha1.py}, který se nachází v kořenovém adresáři. Popis parametrů:
+
+\begin{verbatim}
+python sha1.py [-h] [-s <string>] [-f <filename>] [-v]
+\end{verbatim}
+
+\begin{itemize}
+\item \texttt{sha1.py -h} ... zobrazí nápovědu.
+\item \texttt{sha1.py -s \dqtt{test}} ... najde hash pro řetězec ``test''.
+\item \texttt{sha1.py -s \dqtt{test} -v} ... vypíše určité informace během hashování.
+\item \texttt{sha1.py -f  \dqtt{file.txt}} ... najde hash pro soubor ``file.txt''.
+\item \texttt{sha1.py -f  \dqtt{file.txt} -v} ... vypíše určité informace během hashování.
+\end{itemize}
+
+Je nutné zadat jeden z parametrů \verb|-s| nebo \verb|-f|. Pokud není zadán ani jeden z nich, program vypíše chybu. Pokud jsou zadány oba dva, použije se pouze  \verb|-s|. 
+
+Soubor \verb|sha1_test.py| obsahuje automatické testy, které spuštěním souboru proběhnou a poté se zobrazí výsledek.
+
+Poznámka 1: Hashování souboru o velikosti 3 MB trvá asi 10 vteřin. Aplikace je tedy dobře použitelná spíše pro menší soubory.
+
+Poznámka 2: České znaky se ve výstupu do konzole nezobrazí správně, jelikož zajistit toto pro více platforem je velmi obtížné.
+
+\section{Implementace aplikace}
+Aplikace má následující strukturu:
+\begin{verbatim}
+\src\Sha1Algo.py ... hlavní třída
+\tests ... soubory pro testování
+\sha1.py ... výkonný skript - zajišťuje práci s příkazovou řádkou
+\sha1_test.py ... testovací skript - spouští testy
+\end{verbatim}
+
+Jak funguje algoritmus SHA1 popisuje standard z USA nazvaný ``FIPS PUB 180-1'', který je dostupný např. zde: \url{http://www.nymphomath.ch/crypto/moderne/fip180-1.html}. V aplikaci je použita standardní verze výpočtu hashe ze sekce 7. 
+
+Třída \verb|Sha1Algo| má dvě veřejné metody. Metoda \verb|hash_text| zajišťuje hashování textového řetězce, přičemž je možné zadat jeho kódování (výchozí je UTF-8). Znaky jsou převedeny na číselné kódy (byty) a ty jsou uloženy do pole bytů -- objekt typu \texttt{bytearray}. 
+Metoda \verb|hash_file| zajišťuje hashování zadaného souboru jakéhokoliv typu. Soubor je otevřen v řežimu čtení po bytech a je celý načten do pole bytů. 
+
+Samotné hashování má na starost soukromá metoda \verb|_hash_bytes|, která jako argument přijímá pole bytů a vrací výsledný hash v HEX formátu. Probíhá ve stručnosti následovně:
+\begin{enumerate}
+\item Připrat vstup -- přidat bit 1, doplnit nuly, přidat délku vstupu.
+\item Rozděl vstup -- na bloky po 64 bytech.
+\item Zpracuj bloky:
+	\begin{enumerate}
+	\item Rozděl blok na 16, 32 bitotových, slov -- $16\times4$ B čísel.
+	\item Rozšiř blok na celkem 80 slov (pomocí XORování).
+	\item Zpracuj všechna slova -- podle pořadí projdou některou ze 4 funkcí.
+	\item Aktualizuj H proměnné (h0--h4).
+	\end{enumerate}
+\item Převeď H proměnné do HEX podoby a spoj je za sebe -- vznikne hash.
+\end{enumerate}
+
+Pro práci s byty resp. bity je použit modul \texttt{struct} a jeho metody \texttt{pack} a~\texttt{unpack}.
+
+Zdrojový kód aplikace je poměrně dost okomentovaný, takže dále to již asi není nutné rozebírat.
+
+Pro otestování třídy \texttt{Sha1Algo} byla vytvořena testovací třída \texttt{TestSha1Algo}, která využívá modul \texttt{unittest}. Obsahuje dva testy pro řetězce (jeden v AJ a~jeden v ČJ) a dva testy pro soubory (o velikosti 302 bytů a 57 kB). 
+Výsledek aplikace se porovnává s výsledkem modulu \verb|hashlib|. 
+
+
+
+\end{document}  %End of document.

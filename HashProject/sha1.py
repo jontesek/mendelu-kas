@@ -39,10 +39,13 @@ if __name__ == '__main__':
     elif args.f:
         file_path = os.path.abspath(args.f)
         final_digest = sa.hash_file(file_path, args.v)
+        if not final_digest:
+            raise SystemExit('The file ' + file_path + ' was not found.')
     else:
-        raise SystemExit('Enter an argument to hash. Use -h option to show all possible arguments.')
+        raise SystemExit('Enter an argument to hash (-s for string and -f for file).\n'
+                         'Use -h option to show all possible arguments.')
 
     # Show source and the final digest
     source = args.s if args.s else args.f
-    print('string/filename: ' + source)
+    print('string|filename: ' + source)
     print('SHA1 digest: ' + final_digest)
