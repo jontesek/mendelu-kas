@@ -34,3 +34,7 @@ http://stackoverflow.com/questions/9490730/what-is-the-most-efficient-way-to-con
 
 ONLINE tools
 http://www.fileformat.info/tool/hash.htm
+
+# Set encoding for output and input - unfortunately not working...
+#sys.stdin = codecs.getreader(sys.stdin.encoding)(sys.stdin)
+#sys.stdout = codecs.getwriter('utf8')(sys.stdout)

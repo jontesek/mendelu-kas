@@ -29,7 +29,7 @@ class TestSha1Algo(unittest.TestCase):
         digests = self._general_file_test('tests/h_file.pdf')
         self.assertEqual(digests[0], digests[1])
 
-    # General test methods
+    # General methods for testing
 
     def _general_string_test(self, text):
         # Sha1Algo

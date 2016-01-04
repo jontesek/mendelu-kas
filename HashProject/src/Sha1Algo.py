@@ -16,6 +16,8 @@ class Sha1Algo(object):
         # Verbose flag
         self.verbose = False
 
+    # PUBLIC methods
+
     def hash_text(self, input_text, text_encoding='utf-8', verbose=False):
         """Public method for hashing given text."""
         # Set verbose flag
@@ -45,11 +47,22 @@ class Sha1Algo(object):
                 print 'File size (in bytes): ' + str(len(file_bytes))
             # Hash the bytes.
             return self._hash_bytes(file_bytes)
+        # If the file was not found.
         except IOError:
             return False
 
+    # PRIVATE methods
+
     def _hash_bytes(self, byte_array):
-        """Main private method for hashing (both strings and files)."""
+        """Main private method for hashing (both strings and files).
+
+        Args:
+            byte_array: bytearray object representing a message.
+
+        Returns:
+            String: SHA1 HEX digest of the given message.
+
+        """
         # Prepare and chunk message.
         prepared_msg = self._prepare_msg(byte_array)
         if self.verbose:
@@ -57,34 +70,36 @@ class Sha1Algo(object):
             bin_string = self._bytes_to_bin_string(prepared_msg)
             print(str(len(bin_string)) + ' bits: ' + bin_string)
         chunks = self._chunk_msg(prepared_msg)
-        h_values = self.h_values
+        h_values = self.h_values    # Init H values to the default values.
         # Process all chunks
         for i, chunk in enumerate(chunks):
             if self.verbose:
                 print('======CHUNK %d======') % i
                 print('h values:'), h_values
-            h_values = self._process_chunk(chunk, h_values)
-        # Produce digest from final h values.
+            h_values = self._process_chunk(chunk, h_values)    # update H values
+        # Produce digest from last H values.
         final_hash = self._produce_hex_digest(h_values)
+        if self.verbose:
+            print('>>>>DIGEST<<<<')
         # result
         return final_hash
 
     def _prepare_msg(self, msg):
-        """Prepares message (bytes) before dividing into chunks."""
+        """Prepare message (bytes) before dividing into chunks."""
         # Save original message length (in bytes).
         msg_byte_length = len(msg)
         # Append bit 1 to the end.
         msg.append(0b10000000)
-        # Append zeros until len(stream) mod 512 = 448 (in bits).
-        # But stream is in bytes (1B = 8b): len(stream) mod 64 = 56
+        # Append zeros until len(msg) mod 512 = 448 (in bits).
+        # But message is in bytes (1B = 8b): len(msg) mod 64 = 56
         remainder = len(msg) % 64
         if remainder <= 56:
             add_zero_bytes = 56 - remainder
         else:
             add_zero_bytes = 128 - remainder
-        msg += struct.pack(b'>b', 0) * add_zero_bytes
-        # Append original stream length as 64 bit (8 B) value.
-        msg += struct.pack(b'>q', msg_byte_length * 8)
+        msg += struct.pack(b'>B', 0) * add_zero_bytes
+        # Append original message length as 64 bit (8 B) value.
+        msg += struct.pack(b'>Q', msg_byte_length * 8)
         # result
         return msg
 
@@ -98,8 +113,8 @@ class Sha1Algo(object):
         # Above can be also written as: [msg[i:i+size] for i in range(0, len(msg), size)]
 
     def _process_chunk(self, chunk, h_values):
-        """Process a chunk of data and return new H values."""
-        # Split chunk into 16 32-bit words ... 16 x 4 bytes integers
+        """Process a chunk of data (bytes) and return new H values."""
+        # Split chunk (64 B) into 16, 32-bit, words ... 16 x 4 bytes integers.
         words = [0] * 80
         for i in range(16):
             words[i] = struct.unpack(b'>I', chunk[i*4:i*4 + 4])[0]
@@ -127,9 +142,10 @@ class Sha1Algo(object):
                 f = b ^ c ^ d
                 k = 0xCA62C1D6
             # Update letters
-            a, b, c, d, e = ((self._left_rotate(a, 5) + f + e + k + word) & 0xffffffff, a, self._left_rotate(b, 30), c, d)
+            temp = self._left_rotate(a, 5) + f + e + k + word
+            a, b, c, d, e = (temp & 0xffffffff, a, self._left_rotate(b, 30), c, d)
 
-        # Calculate new H values (truncate the ones longer than 32 bits)
+        # Calculate new H values (truncate the ones longer than 32 bits).
         updated_h_values = [
             (h_values[0] + a) & 0xffffffff,
             (h_values[1] + b) & 0xffffffff,
@@ -140,22 +156,23 @@ class Sha1Algo(object):
 
         return updated_h_values
 
+    # PRIVATE helper methods
 
     def _left_rotate(self, n, b):
-        """Left rotate a 32-bit integer n by b bits."""
+        """Rotate a 32-bit integer n TO LEFT by b bits."""
         return ((n << b) | (n >> (32 - b))) & 0xffffffff
 
     def _produce_hex_digest(self, h_values):
-        """Produce the final digest (hash value) as a string from HEX numbers."""
+        """Produce the final digest (hash) as a string of joined HEX numbers (from h_values)."""
         hex_values = [hex(x)[2:-1].zfill(8) for x in h_values]
         return ''.join(hex_values)
 
     def _convert_text_to_utf8_codes(self, input_text, text_encoding):
-        """Convert given text (in given encoding) to a list of utf8 codes of its characters."""
+        """Convert text (in given encoding) to UTF-8 and return a list of byte codes (of text characters)."""
         utf8_input = unicode(input_text, text_encoding).encode('utf-8')
         return [ord(c) for c in utf8_input]
 
     def _bytes_to_bin_string(self, byte_array):
-        """Helper method for debugging."""
+        """Helper method for debugging - create a binary string (0,1) from given bytearray."""
         new_vals = [bin(x)[2:].zfill(8) for x in byte_array]
         return ''.join([str(x) for x in new_vals])

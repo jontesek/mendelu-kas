@@ -3,8 +3,8 @@ from src.Sha1Algo import Sha1Algo
 
 sa = Sha1Algo()
 # Short text: 8f0c0855915633e4a7de19468b3874c8901df043
-#sa.hash_text('A Test')
-#sa.hash_text('Příliš žluťoučký kůň úpěl ďábelské ódy')  # 8f8d965195fdaf4375fd5ad58e0a1f91329ad30f
+#print sa.hash_text('A Test')
+#print sa.hash_text('Příliš žluťoučký kůň úpěl ďábelské ódy')  # 8f8d965195fdaf4375fd5ad58e0a1f91329ad30f
 
 # Long text: 100 bytes: c6d7501f54c1099833b6b19558b48dc2fc84c14c
 # sa.hash_text('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel massa sem. Nullam commodo nullam')

@@ -1,19 +1,14 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-
 import os
 import sys
-import codecs
-import locale
+
 from src.Sha1Algo import Sha1Algo
 
 # Create the main object
 sa = Sha1Algo()
-# Save terminal encoding
-terminal_encoding = sys.stdin.encoding
 
-
-# If the file was imported.
+# If the file was imported (as module).
 def hash_text(input_text):
     return sa.hash_text(input_text)
 
@@ -21,12 +16,15 @@ def hash_file(file_path):
     return sa.hash_file(os.path.abspath(file_path))
 
 
-# If the script was run directly.
+# If the file was run directly (as script).
 if __name__ == '__main__':
-    # Imports required for command line parsing.
+    # Module required for parsing of command line.
     import argparse
 
-    # Parse the incoming arguments: sha1.py -s <string> OR -f <filename> OR -v
+    # Save terminal encoding
+    terminal_encoding = sys.stdin.encoding
+
+    # Parse the incoming arguments: sha1.py -s <string> OR -f <filename> OR -v OR <input>
     parser = argparse.ArgumentParser(description='SHA1 in Python')
     parser.add_argument('-s', action='store', help='string to hash', metavar='<string>')
     parser.add_argument('-f', action='store', help='file to hash', metavar='<filename>')
@@ -51,6 +49,6 @@ if __name__ == '__main__':
         raise SystemExit('Enter an argument to hash (-s for string and -f for file).\n'
                          'Use -h option to show all possible arguments.')
 
-    # Show source and the final digest
+    # Show source and the final digest.
     print('string|filename: ' + source)
     print('SHA1 digest: ' + final_digest)
